@@ -4,22 +4,22 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-class TrackSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Track
-        fields = '__all__'
-
-class AlbumSerializer(serializers.ModelSerializer):
-    tracks = TrackSerializer(many=True, read_only=True)
-    class Meta:
-        model = Album
-        fields = '__all__'
-
-class ArtistSerializer(serializers.ModelSerializer):
-    albums = AlbumSerializer(many=True, read_only=True)
+class ArtistNestedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Artist
-        fields = '__all__'
+        fields = ['id','name','image']
+
+class AlbumNestedSerializer(serializers.ModelSerializer):
+    artist = ArtistNestedSerializer(read_only=True)
+    class Meta:
+        model = Album
+        fields = ['id','title','artist','cover']
+
+class TrackSerializer(serializers.ModelSerializer):
+    album = AlbumNestedSerializer(read_only=True)
+    class Meta:
+        model = Track
+        fields = ['id','title','duration','audio_url','explicit','track_number','album']
 
 class PlaylistTrackSerializer(serializers.ModelSerializer):
     track = TrackSerializer(read_only=True)
@@ -35,9 +35,10 @@ class PlaylistSerializer(serializers.ModelSerializer):
         read_only_fields = ['owner']
 
 class PlayEventSerializer(serializers.ModelSerializer):
+    track = TrackSerializer(read_only=True)
     class Meta:
         model = PlayEvent
-        fields = '__all__'
+        fields = ['id','track','timestamp','position']
 
 class FavoriteSerializer(serializers.ModelSerializer):
     track = TrackSerializer(read_only=True)
