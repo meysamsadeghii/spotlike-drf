@@ -1,0 +1,34 @@
+[
+  {
+    "model": "music.artist",
+    "pk": 1,
+    "fields": {
+      "name": "Example Artist",
+      "bio": "An example artist",
+      "image": "",
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  },
+  {
+    "model": "music.album",
+    "pk": 1,
+    "fields": {
+      "artist": 1,
+      "title": "Example Album",
+      "release_date": null,
+      "cover": ""
+    }
+  },
+  {
+    "model": "music.track",
+    "pk": 1,
+    "fields": {
+      "album": 1,
+      "title": "Example Track",
+      "duration": 180,
+      "audio_url": "https://example.com/audio.mp3",
+      "explicit": false,
+      "track_number": 1
+    }
+  }
+]
