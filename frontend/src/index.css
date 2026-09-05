@@ -1,0 +1,5 @@
+body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin:0; padding:0; }
+nav { background: #0f172a; color: #fff; padding: 0.5rem 1rem; }
+nav a { color: #fff; margin-right:1rem; text-decoration:none }
+.container{ max-width: 1000px; margin: 0 auto }
+.card{ background: #fff; padding: 1rem; border-radius: 6px; box-shadow: 0 1px 4px rgba(16,24,40,0.06); margin-bottom:1rem }
