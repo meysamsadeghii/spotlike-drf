@@ -1,10 +1,16 @@
 from rest_framework import viewsets, permissions, filters, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from .models import Artist, Album, Track, Playlist, PlaylistTrack, PlayEvent, Favorite
-from .serializers import ArtistSerializer, AlbumSerializer, TrackSerializer, PlaylistSerializer, PlaylistTrackSerializer, PlayEventSerializer, FavoriteSerializer
+from .serializers import ArtistNestedSerializer as ArtistSerializer, AlbumNestedSerializer as AlbumSerializer, TrackSerializer, PlaylistSerializer, PlaylistTrackSerializer, PlayEventSerializer, FavoriteSerializer
 from django.db import models
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from django.contrib.auth import get_user_model
+from rest_framework.views import APIView
+from django.contrib.auth.models import User
+from rest_framework import serializers
+
+User = get_user_model()
 
 class ArtistViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Artist.objects.all()
@@ -75,3 +81,41 @@ class PlayEventViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return PlayEvent.objects.filter(user=self.request.user)
+
+# Registration and profile endpoints
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+    class Meta:
+        model = User
+        fields = ('username','email','password')
+
+    def create(self, validated_data):
+        user = User.objects.create_user(username=validated_data['username'], email=validated_data.get('email'), password=validated_data['password'])
+        return user
+
+class RegisterView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response({'id': user.id, 'username': user.username}, status=status.HTTP_201_CREATED)
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id','username','email','first_name','last_name')
+
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = ProfileSerializer(request.user)
+        return Response(serializer.data)
+
+    def put(self, request):
+        serializer = ProfileSerializer(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
